@@ -1,14 +1,26 @@
 //index.js
 require("dotenv-safe").config();
 const winston = require('winston');
+const { createLogger, format, transports } = require('winston');
+const { combine, timestamp, label, printf } = format;
+const myFormat = printf(({ level, message, label, timestamp }) => {
+  return `${timestamp} [${label}] ${level}: ${ JSON.stringify(message)}`;
+});
 
 const logger = winston.createLogger({
+	 format: combine(
+    label({ label: '' }),
+    timestamp(),
+    myFormat
+  ),
   transports: [
     new winston.transports.Console(),
     new winston.transports.File({ filename: 'combined.log' })
   ]
 });
 
+logger.info("-_-_-_-_-_-_-_-_-_-_");
+logger.warn("Iniciando");
 
 const MercadoBitcoin = require("./api").MercadoBitcoin;
 const MercadoBitcoinTrade = require("./api").MercadoBitcoinTrade;
