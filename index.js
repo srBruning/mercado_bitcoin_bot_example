@@ -1,5 +1,14 @@
 //index.js
 require("dotenv-safe").config();
+const winston = require('winston');
+
+const logger = winston.createLogger({
+  transports: [
+    new winston.transports.Console(),
+    new winston.transports.File({ filename: 'combined.log' })
+  ]
+});
+
 
 const MercadoBitcoin = require("./api").MercadoBitcoin;
 const MercadoBitcoinTrade = require("./api").MercadoBitcoinTrade;
@@ -47,9 +56,9 @@ const comprar = async (vlr) => {
 
 	if(qtdCoin < 0.00009) return ;
  	
-	console.log("[* comprar] qtd: "+qtdCoin+"; vlr: "+vlr )
+	logger.info("[* comprar] qtd: "+qtdCoin+"; vlr: "+vlr )
  	const data = await tradeApi.placeBuyOrder(qtdCoin, vlr);
-	console.log( data);
+	logger.info( data);
 
 }
 
@@ -59,18 +68,18 @@ const vender = async (vlr) => {
 
 	const qtdCoin = parseFloat( ((1.0-TAXA_TRADE) * saldoBTC ).toFixed(5) );
 
-	console.log("[* venda] qtd: "+qtdCoin+"; vlr: "+vlr )
+	logger.info("[* venda] qtd: "+qtdCoin+"; vlr: "+vlr )
 	const data = await tradeApi.placeSellOrder(qtdCoin, vlr);
-	console.log(data);
+	logger.info(data);
 
 }
 
 const negociar = async (dados) => {
-	console.log(dados);
+	logger.info(dados);
 	let _vari = dados.desvioPadrao;
 	if(dados.taxDesvioPadrao< TAXA_VAR_MIN){
 		_vari = TAXA_VAR_MIN/2 * dados.media;
-		console.log("Assumindo desvio: "+_vari);
+		logger.info("Assumindo desvio: "+_vari);
 	}
 	
 	const vlrCompra = parseFloat((dados.media - _vari).toFixed(5));
@@ -86,7 +95,7 @@ const negociar = async (dados) => {
 	// saldoBtcTmp = 0.0;
 	// saldoBrTmp = 0.0;
 
-	// console.log("[* ]",  {saldoBR, saldoBTC} )
+	// logger.info("[* ]",  {saldoBR, saldoBTC} )
 	// btcZerado =false;
 }
 
@@ -100,34 +109,34 @@ async function getQuantity(coin, price){
     }
 
     if(!response_data.balance){
-    	console.log(response_data);
+    	logger.info(response_data);
     	return;
     }
 
-	console.log(response_data.balance['brl']);
-	console.log(response_data.balance[coin.toLowerCase()]);
+	logger.info(response_data.balance['brl']);
+	logger.info(response_data.balance[coin.toLowerCase()]);
 
 
     saldoBR = parseFloat(response_data.balance['brl'].available).toFixed(5)
     saldoBTC = parseFloat(response_data.balance[coin.toLowerCase()].available).toFixed(5)
 
-    console.log(`Saldo disponível de ${coin}: ${saldoBTC}`)
-    console.log(`Saldo disponível de brl: ${saldoBR}`)
+    logger.info(`Saldo disponível de ${coin}: ${saldoBTC}`)
+    logger.info(`Saldo disponível de brl: ${saldoBR}`)
     
     // balanceBrl = parseFloat((balanceBrl / price).toFixed(5))
-    // console.log(parseFloat(balanceBrl) - 0.00001)//tira a diferença que se ganha no arredondamento
+    // logger.info(parseFloat(balanceBrl) - 0.00001)//tira a diferença que se ganha no arredondamento
 }
 
 
 setInterval(async () => {
    		const tick = await infoApi.ticker();
 
-		console.log(tick)
+		logger.info(tick)
 		precos.push(tick.ticker.last);
 		if(precos.length > 10000){
 			precos.shift();
 		}
-		console.log(precos);
+		logger.info(precos);
 		if(precos.length > 1)
 			negociar( mediaDesvio(precos) );
    		
