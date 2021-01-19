@@ -56,7 +56,7 @@ const comprar = async (vlr) => {
 
 	if(qtdCoin < 0.00009) return ;
  	
-	logger.info("[* comprar] qtd: "+qtdCoin+"; vlr: "+vlr )
+	logger.warn(" * [comprar] qtd: "+qtdCoin+"; vlr: "+vlr )
  	const data = await tradeApi.placeBuyOrder(qtdCoin, vlr);
 	logger.info( data);
 
@@ -68,7 +68,7 @@ const vender = async (vlr) => {
 
 	const qtdCoin = parseFloat( ((1.0-TAXA_TRADE) * saldoBTC ).toFixed(5) );
 
-	logger.info("[* venda] qtd: "+qtdCoin+"; vlr: "+vlr )
+	logger.warn(" * [vender] qtd: "+qtdCoin+"; vlr: "+vlr )
 	const data = await tradeApi.placeSellOrder(qtdCoin, vlr);
 	logger.info(data);
 
